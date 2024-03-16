@@ -1,8 +1,10 @@
-## Clear out your feature flags with Moderne
+## Clear out old feature flags with OpenRewrite and Moderne
 <!--
 Alternatives:
 - Fix your feature flagging flow
 - Feature flagging with Moderne
+
+should we mention or reach out to LaunchDarkly somehow?
 -->
 
 
@@ -10,14 +12,14 @@ Alternatives:
 Feature flags are a great enabler for teams and companies.
 They allow you to run quick experiments by only showing a new feature to a subset of users.
 That way you can measure the impact, and make an informed decision on the best path forward for all users.
-Additionally they allow you to decouple deploying a feature from when it's enabled, reducing risk and allowing you roll out when convenient.
+Additionally they allow you to decouple deploying a feature from when it's enabled, reducing risk, and allowing you roll out when convenient.
 
 Feature flags are often enabled through integration with a vendor SDK, to check at runtime if a feature is enabled in a particular context.
 Based on the response from the vendor API call, folks might see the result of either side of a conditional.
 
 
 ### A practical example
-Consider for example that one would like to run an experiment to see if search results passed through an AI model are better than a more traditional ranked search.
+Consider for example that one would like to run an experiment to see if search results returned by an AI model are better than a more traditional ranked search.
 One can define a feature flag key, enable that feature flag for a certain segment of users, and track whether they are more likely to opt for the results presented.
 The below example uses the SDK from our friends at LaunchDarkly as an example.
 
@@ -50,20 +52,22 @@ class SearchService {
 }
 ```
 
-Note how we enter either the `if` or the `else` block for users.
+Note how we call out to LaunchDarkly in the `if` statement,
+and then enter either the `if` or the `else` block depending on the response for this particular user.
 The other side of the conditional is never run for the same user.
 
 In this simplified example we're not showing how success for either search implementation is defined or tracked.
 There would be at least a couple factors, such as response times, number of results, how often folks go for one of the presented results, or refine their query to try again.
+These are all part of the experiment, and determine which conditional block to retain in the future.
 
 ### Feature flags in practice
 
 In practice feature flags might well not be isolated to a single point of use as seen here, but rather span multiple methods, services or even teams.
 For instance: when two teams collaborate on a new feature, one team might be done well ahead of another team.
 That first team can then put the feature behind a feature flag and deploy, with the feature only enabled once the second team catches up.
-This ensures teams can continue to deploy and build upon changes, without coordination or risk to deployments. 
+This ensures teams can continue to deploy and build upon changes, without coordination, merge conflicts or risks to deployments. 
 
-We've regrettably also seen patterns where feature flags might have been permanently enabled or disabled a long time ago, but the conditionals were never cleaned up.
+We've regrettably also seen instances where feature flags might have been permanently enabled or disabled a long time ago, but the conditionals were never cleaned up.
 This might leave developers wondering whether certain code paths are still necessary or maintained, or at worst break down badly when flags are inadvertently toggled again.
 In one extreme case an investing firm went bankrupt hours after such a feature flag related mishap.
 <!-- TOOD insert link; I think that firm was called palantir, and they repurposed feature flags I believe -->
@@ -104,10 +108,11 @@ recipeList:
 
 You can expand this declarative recipe list as features progress, and run it at scale through Moderne to affect all services that might use these flags.
 You could also call out your vendor API to dynamically determine the new default fallback values based on the feature flag maturity.
+That way you can continuously update the use of feature flags across your organization.
 
 ### Phasing out feature flags
 Once your experiment runs to completion, it's time to revisit the feature flags in your source code, and phase out the associated conditionals.
-Through another recipe, you can choose which side of a conditional you want to retain going forward, and clear out anything no longer needed.
+Through another recipe, you can choose which side of a conditional you want to retain going forward, and clear out any conditionals or fields no longer needed.
 
 Listing 3. A declarative yaml recipe list to phase out feature flags and associated conditionals and fields.
 
@@ -168,14 +173,17 @@ index f79c781..96d494f 100644
  }
 ```
 
+Notice how we're completely removing the `if` statement while retaining the call to the new `AiSearchService`,
+and clear out the fields associated with the call to LaunchDarkly, and the more traditional `LuceneSearchService`. 
+
 As we've seen before a list of such recipes can be generated from a call to your feature flag vendor API,
 and run at scale through Moderne for a thorough clearing out of outdated feature flags across the board.
 
 ### Alternative SDKs
-The above recipes work out of the box for the LaunchDarkly SDK, to complement our SDK version migration recipes.
+The above recipes work out of the box for the LaunchDarkly SDK, to complement the SDK version migration recipes we have there.
 But we've also heard from folks who maybe have their own internal library that wraps the LaunchDarkly SDK,
-or even use a different SDK entirely, such as Open Feature. <!-- TODO insert link -->
-We allow the same recipes to be used with different SDKs through an additional optional argument method pattern.
+or even use a different SDK entirely, such as the one for Open Feature. <!-- TODO insert link -->
+We allow the same recipe to be used with different SDKs through an additional optional method pattern argument.
 
 Listing 5. A declarative yaml recipe list to phase out feature flags using an alternative SDK.
 
@@ -191,11 +199,11 @@ recipeList:
       methodPattern: com.acme.bank.flags.FeatureFlags isEnabled(String, boolean)
 ```
 
-Notice how the `methodPatttern` matches an internal method.
+Notice how the `methodPattern` matches an internal method.
 The only requirement here is that the first argument is the feature key.
 
 ### Conclusion
 With the above automations we can take away the pain of working with feature flags,
 to unlock the value they offer to run quick experiments, without the associated technical debt.
-It's yet another case of how you can compose recipes to achieve better outcomes, as part of your everyday work.
+It's yet another case of how you can compose existing recipes to help maintain your code, as part of your everyday work.
 What will you build next?
