@@ -68,7 +68,7 @@ public class ChangeVariationDefault extends Recipe {
             @Override
             public J.MethodInvocation visitMethodInvocation(J.MethodInvocation method, ExecutionContext ctx) {
                 J.MethodInvocation mi = super.visitMethodInvocation(method, ctx);
-                Expression firstArgument = mi.getArguments().get(0);
+                Expression firstArgument = mi.getArguments().getFirst();
                 Expression lastArgument = mi.getArguments().get(mi.getArguments().size() - 1);
                 if (BOOL_VARIATION_MATCHER.matches(mi) && isFeatureKey(firstArgument)) {
                     return changeValue(mi, lastArgument, new J.Literal(Tree.randomId(), Space.SINGLE_SPACE, Markers.EMPTY, defaultValue, defaultValue, null, JavaType.Primitive.Boolean));
@@ -93,7 +93,7 @@ public class ChangeVariationDefault extends Recipe {
             }
 
             private J.MethodInvocation changeValue(J.MethodInvocation mi, Expression existingValue, J.Literal newValue) {
-                if (existingValue instanceof J.Literal && newValue.getValueSource().equals(((J.Literal) existingValue).getValueSource())) {
+                if (existingValue instanceof J.Literal literal && newValue.getValueSource().equals(literal.getValueSource())) {
                     return mi; // No change needed
                 }
                 return mi.withArguments(ListUtils.mapLast(mi.getArguments(), a -> newValue.withPrefix(a.getPrefix())));

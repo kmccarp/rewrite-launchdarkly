@@ -73,7 +73,7 @@ public class MigrateUserToContext extends Recipe {
                                     .javaParser(JavaParser.fromJavaVersion().classpathFromResources(ctx, "launchdarkly-java-server-sdk-6"))
                                     .imports("com.launchdarkly.sdk.LDContext")
                                     .build()
-                                    .apply(getCursor(), newClass.getCoordinates().replace(), newClass.getArguments().get(0));
+                                    .apply(getCursor(), newClass.getCoordinates().replace(), newClass.getArguments().getFirst());
                         } else if (NEW_USER_BUILDER.matches(newClass)) {
                             maybeRemoveImport("com.launchdarkly.sdk.LDUser");
                             maybeAddImport("com.launchdarkly.sdk.LDContext");
@@ -83,7 +83,7 @@ public class MigrateUserToContext extends Recipe {
                                     .javaParser(JavaParser.fromJavaVersion().classpathFromResources(ctx, "launchdarkly-java-server-sdk-6"))
                                     .imports("com.launchdarkly.sdk.LDContext")
                                     .build()
-                                    .apply(getCursor(), newClass.getCoordinates().replace(), newClass.getArguments().get(0));
+                                    .apply(getCursor(), newClass.getCoordinates().replace(), newClass.getArguments().getFirst());
                         }
 
                         return super.visitNewClass(newClass, ctx);
@@ -109,7 +109,7 @@ public class MigrateUserToContext extends Recipe {
                                             m.getCoordinates().replace(),
                                             m.getSelect(),
                                             new J.Literal(Tree.randomId(), Space.EMPTY, Markers.EMPTY, m.getSimpleName(), "\"" + m.getSimpleName() + "\"", null, JavaType.Primitive.String),
-                                            m.getArguments().get(0)
+                                            m.getArguments().getFirst()
                                     );
                         } else if (BUILTIN_PRIVATE_ATTRIBUTE.matches(m) && PRIVATE_ATTRIBUTES.contains(m.getSimpleName())) {
                             doAfterVisit(new UseVarargsForPrivateAttributes());
@@ -131,7 +131,7 @@ public class MigrateUserToContext extends Recipe {
                                             m.getCoordinates().replace(),
                                             m.getSelect(),
                                             new J.Literal(Tree.randomId(), Space.EMPTY, Markers.EMPTY, attributeName, "\"" + attributeName + "\"", null, JavaType.Primitive.String),
-                                            m.getArguments().get(0),
+                                            m.getArguments().getFirst(),
                                             new J.Literal(Tree.randomId(), Space.EMPTY, Markers.EMPTY, attributeName, "\"" + attributeName + "\"", null, JavaType.Primitive.String)
                                     );
                         } else if (CUSTOM_ATTRIBUTES.matches(m)) {
@@ -146,7 +146,7 @@ public class MigrateUserToContext extends Recipe {
                                     .javaParser(JavaParser.fromJavaVersion().classpathFromResources(ctx, "launchdarkly-java-server-sdk-6"))
                                     .imports("com.launchdarkly.sdk.ContextBuilder")
                                     .build()
-                                    .apply(getCursor(), m.getCoordinates().replace(), m.getSelect(), m.getArguments().get(0), m.getArguments().get(1));
+                                    .apply(getCursor(), m.getCoordinates().replace(), m.getSelect(), m.getArguments().getFirst(), m.getArguments().get(1));
                         } else if (PRIVATE_CUSTOM_ATTRIBUTES.matches(m)) {
                             doAfterVisit(new UseVarargsForPrivateAttributes());
 
@@ -161,7 +161,7 @@ public class MigrateUserToContext extends Recipe {
                                     .javaParser(JavaParser.fromJavaVersion().classpathFromResources(ctx, "launchdarkly-java-server-sdk-6"))
                                     .imports("com.launchdarkly.sdk.ContextBuilder")
                                     .build()
-                                    .apply(getCursor(), m.getCoordinates().replace(), m.getSelect(), m.getArguments().get(0), m.getArguments().get(1), m.getArguments().get(0));
+                                    .apply(getCursor(), m.getCoordinates().replace(), m.getSelect(), m.getArguments().getFirst(), m.getArguments().get(1), m.getArguments().getFirst());
                         }
                         return m;
                     }
@@ -226,7 +226,7 @@ public class MigrateUserToContext extends Recipe {
             }
             Collections.reverse(chain);
 
-            J.MethodInvocation select = chain.get(0);
+            J.MethodInvocation select = chain.getFirst();
             for (int i = 1; i < chain.size(); i++) {
                 select = chain.get(i)
                         .withId(Tree.randomId())

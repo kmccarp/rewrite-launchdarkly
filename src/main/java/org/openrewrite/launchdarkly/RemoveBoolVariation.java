@@ -63,8 +63,10 @@ public class RemoveBoolVariation extends Recipe {
     Boolean replacementValue;
 
     @Option(displayName = "Method pattern",
-            description = "A method pattern to match against. If not specified, will match `LDClient` `boolVariation`. " +
-                          "The first argument must be the feature key as `String`.",
+            description = """
+                          A method pattern to match against. If not specified, will match `LDClient` `boolVariation`. \
+                          The first argument must be the feature key as `String`.\
+                          """,
             example = METHOD_PATTERN_BOOLVARIATION,
             required = false)
     @Nullable
@@ -78,7 +80,7 @@ public class RemoveBoolVariation extends Recipe {
             @Override
             public J visitMethodInvocation(J.MethodInvocation method, ExecutionContext ctx) {
                 J.MethodInvocation mi = (J.MethodInvocation) super.visitMethodInvocation(method, ctx);
-                if (methodMatcher.matches(mi) && isFeatureKey(mi.getArguments().get(0))) {
+                if (methodMatcher.matches(mi) && isFeatureKey(mi.getArguments().getFirst())) {
                     doAfterVisit(new SimplifyConstantIfBranchExecution().getVisitor());
                     doAfterVisit(new RemoveUnusedLocalVariables(null).getVisitor());
                     doAfterVisit(new RemoveUnusedPrivateFields().getVisitor());
